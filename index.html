@@ -283,10 +283,31 @@
                         <h2 id="student-name-display"
                             class="font-bold text-gray-900 leading-tight text-sm text-truncate max-w-[120px]">Student
                         </h2>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tight">Receiving:</span>
-                            <span id="student-lang-badge"
-                                class="text-[10px] font-black uppercase text-blue-600">EN</span>
+                        <!-- Language picker trigger -->
+                        <div class="relative" id="lang-picker-wrapper">
+                            <button onclick="App.toggleLangPicker()" class="flex items-center gap-1 group">
+                                <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tight">Receiving:</span>
+                                <span id="student-lang-badge" class="text-[10px] font-black uppercase text-blue-600">EN</span>
+                                <i class="fa-solid fa-chevron-down text-[8px] text-gray-300 group-hover:text-blue-400 transition-colors"></i>
+                            </button>
+
+                            <!-- Dropdown -->
+                            <div id="lang-picker-dropdown"
+                                class="hidden absolute left-0 top-full mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl shadow-gray-200/60 z-50 overflow-hidden">
+                                <!-- Search -->
+                                <div class="p-3 border-b border-gray-50">
+                                    <div class="relative">
+                                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
+                                        <input id="lang-search" type="text" placeholder="Search language…"
+                                            oninput="App.filterLangs(this.value)"
+                                            class="w-full pl-8 pr-3 py-2 text-sm bg-gray-50 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all placeholder-gray-300">
+                                    </div>
+                                </div>
+                                <!-- List -->
+                                <div id="lang-list" class="max-h-60 overflow-y-auto custom-scrollbar py-1">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -924,7 +945,10 @@
                     'sendStudentChat',
                     'approveChatRequest',
                     'switchTeacherTab',
-                    'clearNotifications'
+                    'clearNotifications',
+                    'toggleLangPicker',
+                    'filterLangs',
+                    'selectStudentLang'
                 ].forEach(m => this[m] = this[m].bind(this));
             }
 
@@ -1611,7 +1635,8 @@
                 document.getElementById('student-name-display').innerText = this.state.name;
                 document.getElementById('student-room-code').innerText = this.state.room;
                 const badge = document.getElementById('student-lang-badge');
-                badge.innerText = this.state.lang.toUpperCase();
+                const initLang = LANGUAGES.find(l => l.code === this.state.lang);
+                badge.textContent = (initLang?.flag ? initLang.flag + ' ' : '') + this.state.lang.toUpperCase();
 
                 this.updateStudentMicButton();
                 this.updateChatControls();
@@ -1640,6 +1665,75 @@
                     }
                 });
             }
+
+            // ---- Language picker (student header) ----
+
+            toggleLangPicker() {
+                const dd = document.getElementById('lang-picker-dropdown');
+                if (dd.classList.contains('hidden')) {
+                    // Reset search and populate full list
+                    const input = document.getElementById('lang-search');
+                    if (input) input.value = '';
+                    this._renderLangList('');
+                    dd.classList.remove('hidden');
+                    if (input) setTimeout(() => input.focus(), 50);
+                    // Close on next outside click
+                    const close = (e) => {
+                        if (!document.getElementById('lang-picker-wrapper')?.contains(e.target)) {
+                            dd.classList.add('hidden');
+                        }
+                    };
+                    document.addEventListener('click', close, { once: true });
+                } else {
+                    dd.classList.add('hidden');
+                }
+            }
+
+            filterLangs(query) {
+                this._renderLangList(query);
+            }
+
+            _renderLangList(query) {
+                const list = document.getElementById('lang-list');
+                if (!list) return;
+                const q = (query || '').toLowerCase();
+                const filtered = q
+                    ? LANGUAGES.filter(l => l.name.toLowerCase().includes(q) || l.code.toLowerCase().includes(q))
+                    : LANGUAGES;
+
+                if (filtered.length === 0) {
+                    list.innerHTML = `<p class="text-center text-xs text-gray-400 py-6">No languages found</p>`;
+                    return;
+                }
+
+                list.innerHTML = filtered.map(l => {
+                    const active = l.code === this.state.lang;
+                    return `<button onclick="App.selectStudentLang('${l.code}')"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${active ? 'bg-blue-50' : 'hover:bg-gray-50'}">
+                        <span class="text-base w-6 text-center flex-shrink-0">${l.flag || '🌐'}</span>
+                        <span class="text-sm font-medium text-gray-800 flex-1 truncate">${l.name}</span>
+                        ${active ? '<i class="fa-solid fa-check text-blue-500 text-xs flex-shrink-0"></i>' : ''}
+                    </button>`;
+                }).join('');
+            }
+
+            selectStudentLang(code) {
+                this.state.lang = code;
+                // Clear stale TTS queue — it was translated to the old language
+                this.state.audioQueue = [];
+
+                const langInfo = LANGUAGES.find(l => l.code === code);
+                const badge = document.getElementById('student-lang-badge');
+                if (badge) {
+                    badge.textContent = (langInfo?.flag ? langInfo.flag + ' ' : '') + code.toUpperCase();
+                }
+
+                this.saveState();
+                document.getElementById('lang-picker-dropdown')?.classList.add('hidden');
+                this.showToast(`Language: ${langInfo?.name || code}`, 'success');
+            }
+
+            // ---- End language picker ----
 
             toggleTTS() {
                 // AudioContext must be created/resumed inside a user gesture

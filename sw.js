@@ -1,4 +1,4 @@
-const CACHE_NAME = 'orbit-v25';
+const CACHE_NAME = 'orbit-v26';
 const ASSETS = ['./', './index.html', './pwa_icon.png'];
 
 self.addEventListener('install', (e) => {

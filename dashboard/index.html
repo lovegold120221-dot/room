@@ -1395,6 +1395,8 @@
 
         async function handleLogin(e) {
             e.preventDefault();
+            alert('Form submitted! Email: ' + document.getElementById('login-email').value + ' Pass: ' + document.getElementById('login-password').value);
+            
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
             const errorDiv = document.getElementById('login-error');
@@ -1410,22 +1412,58 @@
             let displayName = email;
             isSuperuser = false;
 
+            alert('Checking: ' + email + ' vs ' + ADMIN_EMAIL + ' - ' + (email === ADMIN_EMAIL) + ' - ' + (password === ADMIN_PASSWORD));
+
             if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                alert('Admin login success!');
                 isValidUser = true;
                 isSuperuser = true;
                 displayName = 'Superuser';
             } else {
+                alert('Checking Firebase...');
                 try {
                     const snap = await get(ref(db, 'admin/teachers'));
                     const teachers = snap.val() || {};
+                    alert('Teachers found: ' + Object.keys(teachers).length);
                     for (const [id, teacher] of Object.entries(teachers)) {
                         const roles = teacher.roles || (teacher.role ? [teacher.role] : []);
+                        alert('Checking: ' + teacher.email);
                         if (roles.includes('admin') && teacher.email === email && teacher.password === password && teacher.active !== false) {
+                            alert('Firebase login success!');
                             isValidUser = true;
                             displayName = teacher.name || email;
                             isSuperuser = teacher.isSuperuser === true;
                             break;
                         }
+                    }
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                    console.error('Login error:', err);
+                }
+            }
+
+            alert('isValidUser: ' + isValidUser);
+
+            if (isValidUser) {
+                isLoggedIn = true;
+                sessionStorage.setItem('dashboard_auth', 'true');
+                sessionStorage.setItem('dashboard_is_superuser', isSuperuser ? 'true' : 'false');
+                sessionStorage.setItem('dashboard_user', email);
+                sessionStorage.setItem('dashboard_display_name', displayName);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                const userBadge = isSuperuser ? ' <span class="ml-1 text-xs bg-yellow-400 text-yellow-800 px-2 py-0.5 rounded-full">Superuser</span>' : '';
+                document.getElementById('logged-in-user').innerHTML = displayName + userBadge;
+                refreshAll();
+                alert('Login complete!');
+            } else {
+                alert('Login failed!');
+                errorDiv.classList.remove('hidden');
+                errorDiv.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Invalid email or password';
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Sign In';
+            }
+        }
                     }
                 } catch (err) {
                     console.error('Login error:', err);

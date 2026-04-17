@@ -20,11 +20,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Implement TTS logic
-    // - Validate input parameters
-    // - Call TTS service (Google Cloud TTS, Azure, etc.)
+    // TODO: Implement TTS logic with LOCAL_TTS_API_KEY
+    // - Use LOCAL_TTS_API_KEY from environment variables
+    // - Call Text-to-Speech service
     // - Return audio URL or base64 audio data
     // - Store audio in cache or storage
+    const ttsApiKey = process.env.LOCAL_TTS_API_KEY;
 
     return NextResponse.json(
       {

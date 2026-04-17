@@ -3,6 +3,11 @@ export default function Home() {
     <main style={{ padding: '40px', fontFamily: 'sans-serif' }}>
       <h1>Eburon Local API v3</h1>
       <p>Welcome to the Eburon Local serverless API powered by Next.js</p>
+      <p>
+        <a href="/docs" style={{ color: '#0066cc', textDecoration: 'underline' }}>
+          📖 View Full API Documentation
+        </a>
+      </p>
 
       <h2>Base URL</h2>
       <code style={{ backgroundColor: '#f5f5f5', padding: '10px', display: 'block', marginBottom: '20px' }}>
@@ -74,13 +79,18 @@ DATABASE_URL=your_database_url
 # Authentication
 JWT_SECRET=your_jwt_secret
 
-# AI Services
+# AI Services - Local Aliases
+LOCAL_LLM_API_KEY=your_local_llm_key
+LOCAL_STT_API_KEY=your_local_stt_key
+LOCAL_TTS_API_KEY=your_local_tts_key
+
+# AI Services - Cartesia AI (ORBIT)
+ORBIT_API_KEY=your_cartesia_orbit_key
+
+# Optional: Other AI Providers
 OPENAI_API_KEY=your_openai_key
 GOOGLE_CLOUD_SPEECH_KEY=your_google_speech_key
-GOOGLE_CLOUD_TTS_KEY=your_google_tts_key
-
-# Other Services
-SERVICE_API_KEY=your_service_key`}
+GOOGLE_CLOUD_TTS_KEY=your_google_tts_key`}
       </pre>
     </main>
   );

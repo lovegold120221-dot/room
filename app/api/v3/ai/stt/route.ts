@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Implement STT logic
+    // TODO: Implement STT logic with LOCAL_STT_API_KEY
+    // - Use LOCAL_STT_API_KEY from environment variables
     // - Validate audio file format (wav, mp3, m4a, etc.)
-    // - Call STT service (Google Cloud Speech, Azure, etc.)
-    // - Return transcribed text
-    // - Handle multiple language support
+    // - Call Speech-to-Text service
+    // - Return transcribed text with confidence score
+    const sttApiKey = process.env.LOCAL_STT_API_KEY;
 
     return NextResponse.json(
       {

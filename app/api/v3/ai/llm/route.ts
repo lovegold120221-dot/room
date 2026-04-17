@@ -40,12 +40,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Implement LLM logic
+    // TODO: Implement LLM logic with LOCAL_LLM_API_KEY or ORBIT_API_KEY
+    // - Use LOCAL_LLM_API_KEY (default) or ORBIT_API_KEY (Cartesia AI) from environment
     // - Validate model availability
-    // - Call LLM service (OpenAI, Anthropic, etc.)
+    // - Call Language Model service
     // - Stream response if requested
-    // - Track token usage
-    // - Handle errors and timeouts
+    // - Track token usage and handle errors
+    const localLlmKey = process.env.LOCAL_LLM_API_KEY;
+    const orbitKey = process.env.ORBIT_API_KEY;
+    const llmApiKey = localLlmKey || orbitKey;
 
     return NextResponse.json(
       {

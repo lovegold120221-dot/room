@@ -1,0 +1,14 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  return NextResponse.json(
+    {
+      status: 'healthy',
+      version: '3.0.0',
+      service: 'eburon-local',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    },
+    { status: 200 }
+  );
+}

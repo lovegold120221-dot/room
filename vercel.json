@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "env": [
+    {
+      "key": "DATABASE_URL",
+      "description": "Database connection string"
+    },
+    {
+      "key": "JWT_SECRET",
+      "description": "Secret key for JWT token signing"
+    },
+    {
+      "key": "OPENAI_API_KEY",
+      "description": "OpenAI API key for LLM services"
+    },
+    {
+      "key": "GOOGLE_CLOUD_SPEECH_KEY",
+      "description": "Google Cloud Speech-to-Text API key"
+    },
+    {
+      "key": "GOOGLE_CLOUD_TTS_KEY",
+      "description": "Google Cloud Text-to-Speech API key"
+    }
+  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "routes": [
+    {
+      "src": "/api/v3/(.*)",
+      "dest": "/api/v3/$1"
+    }
+  ]
+}
